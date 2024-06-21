@@ -1,0 +1,198 @@
+<!DOCTYPE html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autocomplete Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .autocomplete-suggestions {
+            border: 1px solid #ccc;
+            border-top: none;
+            position: absolute;
+            background-color: #fff;
+            z-index: 1000;
+        }
+        .autocomplete-suggestions table {
+            /*width: 100%;*/
+            border-collapse: collapse;
+        }
+        .autocomplete-suggestions table th, .autocomplete-suggestions table td {
+            padding: 8px;
+            text-align: left;   
+            border: 1px solid #eee;
+        }
+        .autocomplete-suggestions table tr:hover, .autocomplete-suggestions table tr.selected {
+            background-color: #f1f1f1;
+        }
+        .highlight {
+            background-color: yellow;
+        }
+        .autocomplete-suggestions table th {
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Autocomplete with Table</h2>
+<input type="text" id="autocomplete-input" placeholder="Start typing..." autocomplete="off" autofocus>
+<div id="autocomplete-suggestions" class="autocomplete-suggestions"></div>
+
+<script>
+    // Sample data ,or you can place in json format here
+    const sampleData = [
+        { name: 'Apple', category: 'Fruit', price: '$1.00', barcode: '123456789012', product_id: 'A001', cost_price: '$0.80', supplier: 'Supplier A' },
+        { name: 'Banana', category: 'Fruit', price: '$0.50', barcode: '123456789013', product_id: 'B001', cost_price: '$0.30', supplier: 'Supplier B' },
+        { name: 'Carrot', category: 'Vegetable', price: '$0.30', barcode: '123456789014', product_id: 'C001', cost_price: '$0.20', supplier: 'Supplier C' },
+        { name: 'Date', category: 'Fruit', price: '$1.20', barcode: '123456789015', product_id: 'D001', cost_price: '$0.90', supplier: 'Supplier D' },
+        { name: 'Eggplant', category: 'Vegetable', price: '$1.50', barcode: '123456789016', product_id: 'E001', cost_price: '$1.20', supplier: 'Supplier E' },
+        { name: 'Fig', category: 'Fruit', price: '$2.00', barcode: '123456789017', product_id: 'F001', cost_price: '$1.50', supplier: 'Supplier F' },
+        { name: 'Grape', category: 'Fruit', price: '$2.50', barcode: '123456789018', product_id: 'G001', cost_price: '$2.00', supplier: 'Supplier G' },
+        { name: 'Honeydew', category: 'Fruit', price: '$3.00', barcode: '123456789019', product_id: 'H001', cost_price: '$2.50', supplier: 'Supplier H' },
+        { name: 'Iced Tea', category: 'Beverage', price: '$1.50', barcode: '123456789020', product_id: 'I001', cost_price: '$1.00', supplier: 'Supplier I' },
+        { name: 'Jackfruit', category: 'Fruit', price: '$2.80', barcode: '123456789021', product_id: 'J001', cost_price: '$2.20', supplier: 'Supplier J' },
+        { name: 'Kale', category: 'Vegetable', price: '$0.90', barcode: '123456789022', product_id: 'K001', cost_price: '$0.70', supplier: 'Supplier K' },
+        { name: 'Lemonade', category: 'Beverage', price: '$1.20', barcode: '123456789023', product_id: 'L001', cost_price: '$0.80', supplier: 'Supplier L' },
+        { name: 'Mango', category: 'Fruit', price: '$1.70', barcode: '123456789024', product_id: 'M001', cost_price: '$1.30', supplier: 'Supplier M' },
+        { name: 'Nectarine', category: 'Fruit', price: '$1.50', barcode: '123456789025', product_id: 'N001', cost_price: '$1.10', supplier: 'Supplier N' },
+        { name: 'Orange Juice', category: 'Beverage', price: '$1.80', barcode: '123456789026', product_id: 'O001', cost_price: '$1.40', supplier: 'Supplier O' },
+        { name: 'Papaya', category: 'Fruit', price: '$1.60', barcode: '123456789027', product_id: 'P001', cost_price: '$1.20', supplier: 'Supplier P' },
+        { name: 'Quinoa', category: 'Grain', price: '$2.20', barcode: '123456789028', product_id: 'Q001', cost_price: '$1.80', supplier: 'Supplier Q' },
+        { name: 'Raspberry', category: 'Fruit', price: '$2.50', barcode: '123456789029', product_id: 'R001', cost_price: '$2.00', supplier: 'Supplier R' },
+        { name: 'Spinach', category: 'Vegetable', price: '$1.00', barcode: '123456789030', product_id: 'S001', cost_price: '$0.70', supplier: 'Supplier S' },
+        { name: 'Tomato', category: 'Vegetable', price: '$0.80', barcode: '123456789031', product_id: 'T001', cost_price: '$0.50', supplier: 'Supplier T' },
+        { name: 'Udon', category: 'Noodle', price: '$1.30', barcode: '123456789032', product_id: 'U001', cost_price: '$1.00', supplier: 'Supplier U' },
+        { name: 'Vanilla Ice Cream', category: 'Dessert', price: '$3.00', barcode: '123456789033', product_id: 'V001', cost_price: '$2.50', supplier: 'Supplier V' },
+        { name: 'Watermelon', category: 'Fruit', price: '$4.00', barcode: '123456789034', product_id: 'W001', cost_price: '$3.00', supplier: 'Supplier W' },
+        { name: 'Xigua', category: 'Fruit', price: '$3.50', barcode: '123456789035', product_id: 'X001', cost_price: '$2.80', supplier: 'Supplier X' },
+        { name: 'Yogurt', category: 'Dairy', price: '$1.20', barcode: '123456789036', product_id: 'Y001', cost_price: '$0.90', supplier: 'Supplier Y' },
+        { name: 'Zucchini', category: 'Vegetable', price: '$1.00', barcode: '123456789037', product_id: 'Z001', cost_price: '$0.70', supplier: 'Supplier Z' }
+    ];
+
+    let currentIndex = -1;
+
+    let filteredSuggestions = [];
+
+    const excludeColumns = ['abc', 'def']; // array key to exclude from autocomplete table
+
+    const inputElement = document.getElementById('autocomplete-input');
+    const suggestionsContainer = document.getElementById('autocomplete-suggestions');
+
+    const excludeFilterColumns = ['barcode', 'cost_price']; // array key to exclude from filter function
+
+    inputElement.addEventListener('input', function() {
+        const input = this.value.toLowerCase();
+
+        // Only perform filtering if input length is greater than 1 character
+        if (input.length > 1) {
+            filteredSuggestions = sampleData.filter(item => 
+                Object.entries(item).some(([key, value]) => 
+                    !excludeColumns.includes(key) && value.toString().toLowerCase().includes(input)
+                )
+            );
+
+            suggestionsContainer.innerHTML = '';
+
+            if (filteredSuggestions.length > 0) {
+                const table = document.createElement('table');
+                const thead = document.createElement('thead');
+                const tbody = document.createElement('tbody');
+
+                // Create table header dynamically
+                thead.innerHTML = `
+                    <tr>
+                        ${Object.keys(sampleData[0])
+                            .filter(key => !excludeColumns.includes(key)) // Exclude specified columns
+                            .map(key => `<th>${key.charAt(0).toUpperCase() + key.slice(1)}</th>`).join('')}
+                    </tr>
+                `;
+                table.appendChild(thead);
+
+                // Create table rows dynamically
+                filteredSuggestions.forEach((suggestion, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        ${Object.keys(suggestion)
+                            .filter(key => !excludeColumns.includes(key)) // Exclude specified columns
+                            .map(key => `<td>${highlightText(suggestion[key], input)}</td>`).join('')}
+                    `;
+                    tr.addEventListener('click', () => selectSuggestion(suggestion));
+                    tr.dataset.index = index;
+                    tbody.appendChild(tr);
+                });
+
+                table.appendChild(tbody);
+                suggestionsContainer.appendChild(table);
+
+                currentIndex = -1; // Reset current index for new input
+            }
+        } else {
+            suggestionsContainer.innerHTML = '';
+        }
+    });
+
+    inputElement.addEventListener('keydown', function(e) {
+        const rows = suggestionsContainer.querySelectorAll('tbody tr');
+        if (rows.length > 0) {
+            if (e.key === 'ArrowDown') {
+                currentIndex = (currentIndex + 1) % rows.length;
+                highlightRow(rows, currentIndex);
+            } else if (e.key === 'ArrowUp') {
+                currentIndex = (currentIndex - 1 + rows.length) % rows.length;
+                highlightRow(rows, currentIndex);
+            } else if (e.key === 'Enter') {
+                if (currentIndex > -1) {
+                    selectSuggestion(filteredSuggestions[currentIndex]);
+                }
+            }
+        }
+        if (e.key === 'Escape') {
+            suggestionsContainer.innerHTML = '';
+        }
+    });
+
+    function highlightRow(rows, index) {
+        Array.from(rows).forEach(row => row.classList.remove('selected'));
+        rows[index].classList.add('selected');
+    }
+
+    function highlightText(text, input) {
+        const regex = new RegExp(`(${input})`, 'gi');
+        return text.toString().replace(regex, '<span class="highlight">$1</span>');
+    }
+
+    function selectSuggestion(suggestion) {
+        inputElement.value = suggestion.NameProduct;//Name of key column data to fill in input-text after select
+        suggestionsContainer.innerHTML = '';
+
+        // Sending data array to nitaPosAdd3.php via POST method
+        const formData = new FormData();
+        Object.entries(suggestion).forEach(([key, value]) => {
+            formData.append(key, value);
+        });
+
+        // Creating and sending the POST request
+        fetch('data-handler.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(data => {
+            console.log('Data sent successfully:', data);
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+    }
+</script>
+
+</body>
+</html>
